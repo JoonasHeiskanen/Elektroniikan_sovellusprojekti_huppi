@@ -2,8 +2,8 @@
 #define __LCD_H__
 
 void lcd_setup(void);
-
-#pragma once
+void lcd_loop(void);
+//#pragma once
 
 #define ILI9341_2_DRIVER
 
@@ -21,7 +21,7 @@ void lcd_setup(void);
 
 #define TFT_INVERSION_ON
 
-#define SPI_FREQUENCY       10000000
+#define SPI_FREQUENCY       20000000
 #define SPI_READ_FREQUENCY  5000000
 
 #endif
