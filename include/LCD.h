@@ -7,12 +7,12 @@ void lcd_setup(void);
 
 #define ILI9341_2_DRIVER
 
-#define TFT_MISO 13
-#define TFT_MOSI 11
-#define TFT_SCLK 12
-#define TFT_CS   10
-#define TFT_DC    9
-#define TFT_RST   8
+#define TFT_CS   4
+#define TFT_RST  5
+#define TFT_DC   6
+#define TFT_MOSI 7
+#define TFT_SCLK 15
+#define TFT_MISO 17
 
 #define LOAD_GLCD
 #define LOAD_FONT2
