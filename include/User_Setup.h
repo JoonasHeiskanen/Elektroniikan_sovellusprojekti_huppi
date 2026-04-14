@@ -2,10 +2,10 @@
 #define USER_SETUP_H
 
 #define USER_SETUP_INFO "MY_CUSTOM_SETUP"
-#define ILI9341_DRIVER
+#define ILI9341_2_DRIVER
 
-#define TFT_WIDTH  320
-#define TFT_HEIGHT 240
+#define TFT_WIDTH  240
+#define TFT_HEIGHT 320
 
 #define TFT_CS   4
 #define TFT_RST  5
