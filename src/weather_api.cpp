@@ -6,7 +6,7 @@
 #include "secrets.h"
 
 String city = "Oulu";
-String couyntryCode = "FI";
+String couyntryCode = "Fi";
 
 weatherData weatherNow = {0.0, 0.0, 0.0, "Ladataan...", false};
 
@@ -24,8 +24,38 @@ void printWeather() {
     }
 }
 
-void getWeather() {
+void checkWifiConnection() {
+    // If connection is true --> return
     if (WiFi.status() == WL_CONNECTED) {
+        return; 
+    }
+
+    // If connection is false
+    digitalWrite(38, LOW);
+    Serial.println("Connection lost, trying to reconnect...");
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
+
+    // Wait 10 seconds to reconnect wifi
+    unsigned long startAttemptTime = millis();
+    while (WiFi.status() != WL_CONNECTED && millis() - startAttemptTime < 10000) {
+        delay(500);
+        Serial.print(".");
+    }
+
+    // Check if connection is true
+    if (WiFi.status() == WL_CONNECTED) {
+        Serial.println("\nWiFi reconnected!");
+        digitalWrite(38, HIGH); //Set led high
+    } else {
+        Serial.println("\nConnection failed.");
+        digitalWrite(38, LOW); //Set led low
+    }
+}
+
+void getWeather() {
+    checkWifiConnection();
+    if (WiFi.status() == WL_CONNECTED) {
+        digitalWrite(38, HIGH);
         HTTPClient http;
         String url = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "," + couyntryCode + "&appid=" + String(WEATHER_API_KEY) + "&units=metric&lang=en";
 
@@ -36,6 +66,10 @@ void getWeather() {
             String payload = http.getString();
             JsonDocument doc;
             DeserializationError error = deserializeJson(doc, payload);
+            // Lisää getWeather-funktioon JSON-parsimisen jälkeen:
+            long dataTime = doc["dt"];
+            Serial.print("Datan mittausaika (Unix): ");
+            Serial.println(dataTime);
 
             if (!error) {
                 // --- Saving data to struct ---
@@ -45,9 +79,9 @@ void getWeather() {
                 
                 const char* desc = doc["weather"][0]["description"];
                 strncpy(weatherNow.desc, desc, sizeof(weatherNow.desc) - 1);
-                weatherNow.desc[sizeof(weatherNow.desc) - 1] = '\0'; // Varmistus
+                weatherNow.desc[sizeof(weatherNow.desc) - 1] = '\0';
                 
-                // Nostetaan lippu ylös vasta kun kaikki data on tallennettu
+                // Flag up when data is saved
                 weatherNow.updated = true; 
 
                 // Debug-print (using struct values)
@@ -80,4 +114,7 @@ void weather_setup() {
         Serial.print(".");
     }
     Serial.println("\nConnected!");
+    //lastUpdate = millis(); //If used when device restart, does not do instant http-GET from api
+    pinMode(38, OUTPUT);
+    digitalWrite(38, HIGH);
 }

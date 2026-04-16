@@ -6,7 +6,7 @@ struct weatherData {
     float feelsLike;
     float wind;
     char desc[64];
-    bool updated; // Lippu, jotta tiedetään milloin uusi data on saapunut
+    bool updated; // Flag when we know when data has arrived
 };
 
 extern weatherData weatherNow;
@@ -14,5 +14,6 @@ extern weatherData weatherNow;
 void getWeather(void);
 void weather_setup(void);
 void printWeather(void);
+void checkWifiConnection(void);
 
 #endif
