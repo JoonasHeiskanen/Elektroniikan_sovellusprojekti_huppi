@@ -22,13 +22,15 @@ void uiUpdateTime() {
     char buf[16];
     snprintf(buf, sizeof(buf), "%s", getCurrentTime().c_str());
 
+    
     lcd_drawText(0, 20, String(buf));
 }
 
 void uiUpdateDate() {
     String date = getDisplayDate();
 
-    lcd_drawText(0, 0, date);
+    lcd_UpdateDate(date);
+    //lcd_drawText(0, 0, date);
 }
 
 void uiUpdatePrices() {

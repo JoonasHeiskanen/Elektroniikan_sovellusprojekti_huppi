@@ -3,3 +3,7 @@
 2. !!!Important!!! In VSCode, go to PlatformIO extension -> project tasks -> esp32s3 -> Upload Filesystem Image
 
 3. Merge or copy lcd.h and lcd.cpp. Two test functions are included which can be discarded after testing.
+
+4. Add #define SMOOTH_FONT to User_Setup.h
+
+5. Add board_build.filesystem = spiffs to platform.ini
