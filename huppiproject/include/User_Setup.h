@@ -3,6 +3,7 @@
 
 #define USER_SETUP_INFO "MY_CUSTOM_SETUP"
 #define ILI9341_2_DRIVER
+#define SMOOTH_FONT
 
 #define TFT_WIDTH  240
 #define TFT_HEIGHT 320
@@ -21,7 +22,6 @@
 #define LOAD_GFXFF
 
 #define TFT_INVERSION_ON
-
 #define SPI_FREQUENCY       10000000
 #define SPI_READ_FREQUENCY  5000000
 
