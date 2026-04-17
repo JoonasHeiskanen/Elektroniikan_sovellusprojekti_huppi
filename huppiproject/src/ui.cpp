@@ -28,7 +28,8 @@ void uiUpdateTime() {
 void uiUpdateDate() {
     String date = getDisplayDate();
 
-    lcd_drawText(0, 0, date);
+    //lcd_drawText(0, 0, date);
+    lcd_updateDate(date);
 }
 
 void uiUpdatePrices() {
