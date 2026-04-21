@@ -5,8 +5,10 @@ void lcd_setup(void);
 void lcd_clear();
 void lcd_drawText(int x, int y, String text);
 void lcd_updateDate(String);
-
+void lcd_drawLine(int32_t xs, int32_t ys, int32_t xe, int32_t ye);
 void testSmoothFonts();
+void lcd_updateTime(String);
+void lcd_updateWeather(String, String, String);
 //Test the weather icons
 void testWeatherIcons();
 

@@ -9,6 +9,7 @@
 #include "ui.h"
 #include "dht.h"
 #include "scd.h"
+#include "buttons.h"
 
 static int lastMinute = -1;
 static int lastHour = -1;
@@ -50,6 +51,30 @@ void loop() {
     networkUpdate();
     dht_update();
     scd_update();
+    checkButton();
+
+    static DisplayState previousState = (DisplayState)-1; // Alustetaan "olemattomaan" tilaan
+
+    // Suoritetaan piirtäminen VAIN jos tila on vaihtunut
+    if (currentState != previousState) {
+        
+        // Tyhjennetään näyttö aina kun tila vaihtuu, jotta vanhat piirrokset poistuvat
+        lcd_clear(); 
+
+        if (currentState == STATE1) {
+            ui_menu();
+        }
+        else if (currentState == STATE2) {
+            ui_24h_spotPrice();
+        }
+        else if (currentState == STATE3) {
+            lcd_drawText(10, 10, "STATE3");
+        }
+
+        // Päivitetään muisti, jotta ensi kierroksella ei piirretä uudestaan
+        previousState = currentState;
+    }
+
 
     time_t now = time(nullptr);
     struct tm *t = localtime(&now);

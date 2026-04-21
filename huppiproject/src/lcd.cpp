@@ -4,6 +4,10 @@
 #include <FS.h>
 #include <SPIFFS.h>
 
+String mainFont = "calibri24";
+String mainFont2 = "calibri16";
+String tempFont = "DSEG7Modern-Bold36";
+
 TFT_eSPI tft = TFT_eSPI();
 
 void lcd_setup() {
@@ -252,16 +256,56 @@ void testSmoothFonts() {
 void lcd_updateDate(String d){
 
   //This function is just for example!
-  
-  tft.drawRect(0,0,100,30,TFT_GREEN);
 
-  if (SPIFFS.exists("/calibri16.vlw")) {
-    tft.loadFont("calibril16", SPIFFS);
-    tft.setTextColor(TFT_GREEN, TFT_BLACK, true);
+  if (SPIFFS.exists("/calibri24.vlw")) {
+    tft.loadFont(mainFont, SPIFFS);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
     tft.drawString(d, 5, 5);
     //Serial.println("Printed with font: calibri16");
     tft.unloadFont();
   } else {
-    Serial.println("Missing font: /calibri16.vlw");
+    Serial.println("Missing font: /calibri24.vlw");
   }
+}
+
+void lcd_updateTime(String t) {
+  if (SPIFFS.exists("/calibri24.vlw")) {
+    tft.loadFont(mainFont, SPIFFS);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+    tft.drawString(t, 140, 5);
+    tft.unloadFont();
+  } else {
+    Serial.println("Missing font: /calibri24.vlw");
+  }
+}
+
+void lcd_updateWeather(String temp, String temp2, String desc) {
+  if (SPIFFS.exists("/DSEG7Modern-Bold36.vlw")) {
+    tft.loadFont(tempFont, SPIFFS);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+    tft.drawString(temp, 5, 220);
+    tft.unloadFont();
+  } else {
+    Serial.println("Missing font: /DSEG7Modern-Bold36.vlw");
+  }
+  if (SPIFFS.exists("/calibri24.vlw")) {
+    tft.loadFont(mainFont, SPIFFS);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+    tft.drawString(temp2, 5, 260);
+    tft.unloadFont();
+  } else {
+    Serial.println("Missing font: /calibri24.vlw");
+  }
+  if (SPIFFS.exists("/calibri24.vlw")) {
+    tft.loadFont(mainFont, SPIFFS);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+    tft.drawString(desc, 200, 250);
+    tft.unloadFont();
+  } else {
+    Serial.println("Missing font: /calibri24.vlw");
+  }
+}
+
+void lcd_drawLine(int32_t xs, int32_t ys, int32_t xe, int32_t ye) {
+  tft.drawLine(xs, ys, xe, ye, TFT_LIGHTGREY);
 }
