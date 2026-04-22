@@ -10,6 +10,10 @@ String mainFont = "calibri24";
 String mainFont2 = "calibri16";
 String tempFont = "DSEG7Modern-Bold36";
 
+//Align edge pixels where drawfunctions start to draw
+int leftAlign_x = 5;
+int topAlign_y = 5;
+
 TFT_eSPI tft = TFT_eSPI();
 
 void lcdSetup() {
@@ -44,7 +48,7 @@ void lcdDrawDate(String d){
     if (SPIFFS.exists("/calibri24.vlw")) {
         tft.loadFont(mainFont, SPIFFS);
         tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
-        tft.drawString(d, 5, 5);
+        tft.drawString(d, leftAlign_x, 5);
         tft.unloadFont();
     } else {
         Serial.println("Missing font: /calibri24.vlw");
@@ -55,7 +59,7 @@ void lcdDrawTime(String t) {
     if (SPIFFS.exists("/calibri24.vlw")) {
         tft.loadFont(mainFont, SPIFFS);
         tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
-        tft.drawString(t, 140, 5);
+        tft.drawString(t, 175, topAlign_y);
         tft.unloadFont();
     } else {
         Serial.println("Missing font: /calibri24.vlw");
@@ -66,7 +70,7 @@ void lcdDrawWeather(String temp, String temp2, String desc) {
     if (SPIFFS.exists("/DSEG7Modern-Bold36.vlw")) {
         tft.loadFont(tempFont, SPIFFS);
         tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
-        tft.drawString(temp, 5, 220);
+        tft.drawString(temp, leftAlign_x, 220);
         tft.unloadFont();
     } else {
         Serial.println("Missing font: /DSEG7Modern-Bold36.vlw");
@@ -75,16 +79,27 @@ void lcdDrawWeather(String temp, String temp2, String desc) {
     if (SPIFFS.exists("/calibri24.vlw")) {
         tft.loadFont(mainFont, SPIFFS);
         tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
-        tft.drawString(temp2, 5, 260);
+        tft.drawString(temp2, leftAlign_x, 260);
         tft.unloadFont();
     } else {
         Serial.println("Missing font: /calibri24.vlw");
     }
 
-    if (SPIFFS.exists("/calibri24.vlw")) {
+    /*if (SPIFFS.exists("/calibri24.vlw")) {
         tft.loadFont(mainFont, SPIFFS);
         tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
         tft.drawString(desc, 200, 250);
+        tft.unloadFont();
+    } else {
+        Serial.println("Missing font: /calibri24.vlw");
+    }*/
+}
+
+void lcdDrawCurrentPrice(String c) {
+    if (SPIFFS.exists("/calibri24.vlw")) {
+        tft.loadFont(mainFont, SPIFFS);
+        tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+        tft.drawString(c, leftAlign_x, 70);
         tft.unloadFont();
     } else {
         Serial.println("Missing font: /calibri24.vlw");

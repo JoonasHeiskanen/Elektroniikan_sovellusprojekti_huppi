@@ -15,6 +15,8 @@ void lcdDrawTime(String t);
 
 void lcdDrawWeather(String temp, String temp2, String desc);
 
+void lcdDrawCurrentPrice(String c);
+
 void lcdDrawSpotGraph(float* prices);
 
 #endif
