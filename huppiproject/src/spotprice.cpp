@@ -6,6 +6,7 @@
 #include <ArduinoJson.h>
 
 float prices[24];
+float nextPrices[24];
 
 static String lastFetchedDate = "";
 

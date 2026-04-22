@@ -6,7 +6,7 @@
 #include "weather.h"
 #include "secrets.h"
 
-static WeatherData weatherNow = {0.0, 0.0, 0.0, "No data", false};
+static WeatherData weatherNow = {0.0, 0.0, 0, 0.0, "No data", false};
 
 void weatherBegin() {
     weatherNow.updated = false;
@@ -44,8 +44,9 @@ bool weatherUpdate() {
         return false;
     }
 
-    weatherNow.out_temperature = doc["main"]["temp"];
+    weatherNow.outTemperature = doc["main"]["temp"];
     weatherNow.feelsLike = doc["main"]["feels_like"];
+    weatherNow.humidity = doc["main"]["humidity"];
     weatherNow.wind = doc["wind"]["speed"];
 
     const char* desc = doc["weather"][0]["description"];

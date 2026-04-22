@@ -3,10 +3,13 @@
 #include <Arduino.h>
 
 struct WeatherData {
-    float out_temperature;
+    float outTemperature;
     float feelsLike;
+    int humidity;
     float wind;
+
     char desc[32];
+
     bool updated;
 };
 

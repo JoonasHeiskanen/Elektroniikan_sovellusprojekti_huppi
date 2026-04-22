@@ -6,6 +6,7 @@
 #include "network.h"
 #include "dht.h"
 #include "scd.h"
+#include "buttons.h"
 
 static int lastMinute = -1;
 static int lastHour = -1;
@@ -17,20 +18,16 @@ static String lastWeatherDesc = "";
 void uiBegin() {}
 
 void uiUpdateTime() {
-    int h = getCurrentHour();
-
     char buf[16];
     snprintf(buf, sizeof(buf), "%s", getCurrentTime().c_str());
 
-    //lcd_drawText(0, 20, String(buf));
-    lcd_updateTime(buf);
+    lcdDrawText(200, 0, String(buf), 40, 20);
 }
 
 void uiUpdateDate() {
     String date = getDisplayDate();
 
-    //lcd_drawText(0, 0, date);
-    lcd_updateDate(date);
+    lcdDrawText(0, 0, date, 100, 20);
 }
 
 void uiUpdatePrices() {
@@ -39,76 +36,90 @@ void uiUpdatePrices() {
 
     char buf1[32];
     snprintf(buf1, sizeof(buf1), "Now: %.2f c/kWh", prices[h]);
-    //lcd_drawText(0, 40, String(buf1));
+    lcdDrawText(0, 0, String(buf1), 240, 20);
 
-    char buf2[32];
-    snprintf(buf2, sizeof(buf2), "Next: %.2f c/kWh", prices[nextH]);
-    //lcd_drawText(0, 60, String(buf2));
+    if (nextH == 0) {
+        lcdDrawText(0, 20, "Next: -.-- c/kWh", 240, 20);
+    } else {
+        char buf2[32];
+        snprintf(buf2, sizeof(buf2), "Next: %.2f c/kWh", prices[nextH]);
+        lcdDrawText(0, 20, String(buf2), 240, 20);
+    }
 }
 
 void uiUpdateWeather() {
     WeatherData w = getWeather();
 
-    char buf1[32];
-    snprintf(buf1, sizeof(buf1), "%.1f", w.out_temperature);
-    char buf2[32];
-    snprintf(buf2, sizeof(buf2), "Feels like %.1f", w.feelsLike);
+    if (!w.updated) {
+        lcdDrawText(0, 120, "Weather: no data", 240, 20);
+        return;
+    }
 
-    //lcd_drawText(0, 100, String(buf));
-    //lcd_drawText(0, 120, String(w.desc));
-    lcd_updateWeather(buf1, buf2, w.desc);
+    char line1[32];
+    snprintf(line1, sizeof(line1), "%.1fC, Feels Like: %.1fC", w.outTemperature, w.feelsLike);
+
+    char line2[32];
+    snprintf(line2, sizeof(line2), "Hum: %d%%  Wind: %.1fm/s", w.humidity, w.wind);
+
+    lcdDrawText(0, 120, String(line1), 240, 20);
+    lcdDrawText(0, 140, String(w.desc), 240, 20);
+    lcdDrawText(0, 160, String(line2), 240, 20);
 }
 
-void uiUpdateWifi() {
+void uiUpdateWifi(bool force) {
+    if (getState() != STATE1) return;
+
     bool wifi = isWifiConnected();
 
-    if (wifi == lastWifi) return;
+    if (!force && wifi == lastWifi) return;
     lastWifi = wifi;
 
-    //lcd_drawText(0, 80, wifi ? "WiFi OK" : "WiFi LOST");
+    lcdDrawText(0, 300, wifi ? "WiFi OK" : "WiFi LOST", 240, 20);
 }
 
 void uiUpdateDHT() {
-    DHTData d = dht_get();
+    DHTData d = dhtGet();
 
-    /*if (!d.valid) {
-        lcd_drawText(0, 140, "T: --.- C");
-        lcd_drawText(0, 160, "H: --.- %");
+    if (!d.valid) {
+        lcdDrawText(0, 40, "T: --.- C", 240, 20);
+        lcdDrawText(0, 60, "H: --.- %", 240, 20);
         return;
     }
 
-    lcd_drawText(0, 140, "T: " + String(d.temperature, 1) + " C");
-    lcd_drawText(0, 160, "H: " + String(d.humidity, 1) + " %");*/
+    lcdDrawText(0, 40, "T: " + String(d.temperature, 1) + " C", 240, 20);
+    lcdDrawText(0, 60, "H: " + String(d.humidity, 1) + " %", 240, 20);
 }
 
 void uiUpdateSCD() {
-    SCDData s = scd_get();
+    SCDData s = scdGet();
 
-    /*if (!s.valid) {
-        lcd_drawText(0, 180, "CO2: --- ppm");
-        lcd_drawText(0, 200, "T2: --.- C");
-        lcd_drawText(0, 220, "H2: --.- %");
+    if (!s.valid) {
+        lcdDrawText(0, 80, "CO2: --- ppm", 240, 20);
         return;
     }
 
-    lcd_drawText(0, 180, "CO2: " + String(s.co2) + " ppm");
-    lcd_drawText(0, 200, "T2: " + String(s.temperature, 1) + " C");
-    lcd_drawText(0, 220, "H2: " + String(s.humidity, 1) + " %");*/
+    lcdDrawText(0, 80, "CO2: " + String(s.co2) + " ppm", 240, 20);
 }
 
-void ui_menu() {
-  lcd_drawLine(0, 100, 240, 100);
-  lcd_drawLine(0, 210, 240, 210);
-  lcd_drawLine(0, 101, 240, 101);
-  lcd_drawLine(0, 211, 240, 211);
-
-  uiUpdateDate();
-  uiUpdateTime();
-  uiUpdateWeather();
+void uiSpotGraph() {
+    lcdDrawSpotGraph(prices);
 }
 
-void ui_24h_spotPrice() {
-  lcd_drawLine(0, 100, 240, 100);
-  lcd_drawLine(0, 210, 240, 210);
-  lcd_drawText(60, 160, "24H SPOT PRICE HERE!");
+void uiRender(DisplayState state) {
+    switch (state) {
+
+        case STATE1: {
+            uiUpdateDate();
+            uiUpdateTime();
+            uiUpdateDHT();
+            uiUpdateSCD();
+            uiUpdateWeather();
+            break;
+        }
+
+        case STATE2: {
+            uiUpdatePrices();
+            break;
+        }
+    }
 }

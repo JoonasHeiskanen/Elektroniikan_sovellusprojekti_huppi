@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include "buttons.h"
 
 void uiBegin();
 
@@ -8,8 +9,8 @@ void uiUpdateTime();
 void uiUpdateDate();
 void uiUpdatePrices();
 void uiUpdateWeather();
-void uiUpdateWifi();
+void uiUpdateWifi(bool);
 void uiUpdateDHT();
 void uiUpdateSCD();
-void ui_menu(void);
-void ui_24h_spotPrice(void);
+void uiSpotGraph();
+void uiRender(DisplayState state);

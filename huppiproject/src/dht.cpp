@@ -5,12 +5,12 @@ DHT20 DHT(&Wire);
 static DHTData state = {0.0f, 0.0f, false};
 static unsigned long lastRead = 0;
 
-void dht_setup() {
+void dhtSetup() {
     Wire.begin(13, 12);
     DHT.begin();
 }
 
-void dht_update() {
+void dhtUpdate() {
     if (millis() - lastRead < 2000) return;
     lastRead = millis();
 
@@ -28,6 +28,6 @@ void dht_update() {
     }
 }
 
-DHTData dht_get() {
+DHTData dhtGet() {
     return state;
 }
