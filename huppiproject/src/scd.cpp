@@ -7,7 +7,7 @@ SensirionI2cScd4x scd4x;
 static SCDData state = {0, 0.0f, 0.0f, false};
 static unsigned long lastRead = 0;
 
-void scd_setup() {
+void scdSetup() {
     Wire.begin(13, 12);
 
     scd4x.begin(Wire, 0x62);
@@ -20,7 +20,7 @@ void scd_setup() {
     error = scd4x.startPeriodicMeasurement();
 }
 
-void scd_update() {
+void scdUpdate() {
     if (millis() - lastRead < 2000) return;
     lastRead = millis();
 
@@ -47,6 +47,6 @@ void scd_update() {
     state.valid = true;
 }
 
-SCDData scd_get() {
+SCDData scdGet() {
     return state;
 }

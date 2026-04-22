@@ -1,5 +1,6 @@
 #include "network.h"
 #include "secrets.h"
+#include "ui.h"
 
 static uint8_t WIFI_LED_PIN = 38;
 
@@ -44,6 +45,12 @@ void networkUpdate() {
 
     if (!connected && wifiWasConnected) {
         wifiWasConnected = false;
+        uiUpdateWifi(false);
+    }
+
+    if (connected && !wifiWasConnected) {
+        wifiWasConnected = false;
+        uiUpdateWifi(false);
     }
 
     if (!connected && millis() - lastReconnectAttempt >= reconnectInterval) {

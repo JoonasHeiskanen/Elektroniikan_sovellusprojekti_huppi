@@ -1,267 +1,138 @@
 #include <Arduino.h>
-#include "lcd.h"
 #include <TFT_eSPI.h>
 #include <FS.h>
 #include <SPIFFS.h>
 
+#include "lcd.h"
+#include "timeutils.h"
+
+String mainFont = "calibri24";
+String mainFont2 = "calibri16";
+String tempFont = "DSEG7Modern-Bold36";
+
 TFT_eSPI tft = TFT_eSPI();
 
-void lcd_setup() {
-  Serial.println("lcd_setup start");
+void lcdSetup() {
+    if (!SPIFFS.begin(true)) {
+        Serial.println("SPIFFS mount failed");
+        while (true) delay(1000);
+    }
 
-  //Checkk for User_Setup.h
-  #ifdef USER_SETUP_INFO
-    Serial.println(USER_SETUP_INFO);
-  #else
-    Serial.println("USER_SETUP_INFO not found");
-  #endif
+    pinMode(16, OUTPUT);
+    digitalWrite(16, HIGH);
 
-//Check for SPIFFS
-//SPIFFS = internal flash memory location where fonts are loaded into
- if (!SPIFFS.begin(true)) {
-    Serial.println("SPIFFS mount failed");
-    while (true) delay(1000);
-  }
-
-  //Set SCREEN_LED pin high
-  pinMode(16, OUTPUT);
-  digitalWrite(16,HIGH);
-
-  tft.init();
-  tft.setRotation(2);
-  tft.fillScreen(TFT_BLACK);
-  tft.setTextColor(TFT_WHITE, TFT_BLUE);
-  //tft.drawString("hello world!", 0, 0, 2);
-
-  Serial.println("lcd setup done");
-}
-
-void lcd_clear() {
+    tft.init();
+    tft.setRotation(2);
     tft.fillScreen(TFT_BLACK);
 }
 
-void lcd_drawText(int x, int y, String text) {
-    tft.fillRect(x, y, 240, 20, TFT_BLACK);
+void lcdClear() {
+    tft.fillScreen(TFT_BLACK);
+}
 
-    //Normal ESPI fonts:
+void lcdDrawLine(int32_t xs, int32_t ys, int32_t xe, int32_t ye) {
+    tft.drawLine(xs, ys, xe, ye, TFT_LIGHTGREY);
+}
+
+void lcdDrawText(int x, int y, String text, int width = 240, int height = 20) {
+    tft.fillRect(x, y, width, height, TFT_BLACK);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.drawString(text, x, y, 2);
+}
 
-    /*
-    //Smooth fonts:
-    if (SPIFFS.exists("/calibri16.vlw")) {
-      tft.loadFont("calibril16", SPIFFS);
-      tft.setTextColor(TFT_ORANGE, TFT_BLACK, true);
-      tft.drawString(text, 0, y);
-      //Serial.println("Printed with font: calibri16");
-      y += tft.fontHeight() + 6;
-      tft.unloadFont();
+void lcdDrawDate(String d){
+    if (SPIFFS.exists("/calibri24.vlw")) {
+        tft.loadFont(mainFont, SPIFFS);
+        tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+        tft.drawString(d, 5, 5);
+        tft.unloadFont();
     } else {
-      Serial.println("Missing font: /calibri16.vlw");
+        Serial.println("Missing font: /calibri24.vlw");
     }
-    */
-    
 }
 
-// Convert a Unicode/icon code point into a UTF-8 string
-// TFT_eSPI smooth fonts need UTF-8 text, not raw hex values
-String utf8FromCodepoint(uint16_t cp) {
-  String s = "";
-
-  // 1-byte UTF-8 character (basic ASCII)
-  if (cp < 0x80) {
-    s += char(cp);
-  }
-
-  // 2-byte UTF-8 character
-  else if (cp < 0x800) {
-    s += char(0xC0 | (cp >> 6));
-    s += char(0x80 | (cp & 0x3F));
-  }
-
-  // 3-byte UTF-8 character
-  // Weather Icons code points such as 0xF00D go here
-  else {
-    s += char(0xE0 | (cp >> 12));
-    s += char(0x80 | ((cp >> 6) & 0x3F));
-    s += char(0x80 | (cp & 0x3F));
-  }
-
-  return s;
+void lcdDrawTime(String t) {
+    if (SPIFFS.exists("/calibri24.vlw")) {
+        tft.loadFont(mainFont, SPIFFS);
+        tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+        tft.drawString(t, 140, 5);
+        tft.unloadFont();
+    } else {
+        Serial.println("Missing font: /calibri24.vlw");
+    }
 }
 
-void testWeatherIcons() {
-  // Mount SPIFFS so the .vlw weather font can be loaded
-  if (!SPIFFS.begin(true)) {
-    Serial.println("SPIFFS mount failed");
-    return;
-  }
+void lcdDrawWeather(String temp, String temp2, String desc) {
+    if (SPIFFS.exists("/DSEG7Modern-Bold36.vlw")) {
+        tft.loadFont(tempFont, SPIFFS);
+        tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+        tft.drawString(temp, 5, 220);
+        tft.unloadFont();
+    } else {
+        Serial.println("Missing font: /DSEG7Modern-Bold36.vlw");
+    }
 
-  // Clear screen and set icon color
-  tft.fillScreen(TFT_BLACK);
-  tft.setTextColor(TFT_ORANGE, TFT_BLACK, true);
+    if (SPIFFS.exists("/calibri24.vlw")) {
+        tft.loadFont(mainFont, SPIFFS);
+        tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+        tft.drawString(temp2, 5, 260);
+        tft.unloadFont();
+    } else {
+        Serial.println("Missing font: /calibri24.vlw");
+    }
 
-  // Load the weather icon font from SPIFFS
-  tft.loadFont("weathericons-36", SPIFFS);
-
-  // Draw icons directly using the same Unicode values
-  // that were added to specificUnicodes in the Processing tool
-
-  tft.drawString(utf8FromCodepoint(0xF00D), 10, 20);   // wi-day-sunny
-  tft.drawString(utf8FromCodepoint(0xF002), 50, 20);   // wi-day-sunny-overcast
-  tft.drawString(utf8FromCodepoint(0xF041), 90, 20);   // wi-cloud
-  tft.drawString(utf8FromCodepoint(0xF013), 130, 20);  // wi-cloudy
-  tft.drawString(utf8FromCodepoint(0xF019), 170, 20);  // wi-rain
-
-  tft.drawString(utf8FromCodepoint(0xF008), 10, 80);   // wi-day-rain
-  tft.drawString(utf8FromCodepoint(0xF01E), 50, 80);   // wi-thunderstorm
-  tft.drawString(utf8FromCodepoint(0xF064), 90, 80);   // wi-snow-wind
-  tft.drawString(utf8FromCodepoint(0xF014), 130, 80);  // wi-fog
-  tft.drawString(utf8FromCodepoint(0xF050), 170, 80);  // wi-strong-wind
-
-  tft.drawString(utf8FromCodepoint(0xF03C), 10, 140);  // wi-celsius
-  tft.drawString(utf8FromCodepoint(0xF07A), 50, 140);  // wi-humidity
-  tft.drawString(utf8FromCodepoint(0xF042), 90, 140);  // wi-degrees
-  tft.drawString(utf8FromCodepoint(0xF03D), 130, 140); // wi-cloud-down
-  tft.drawString(utf8FromCodepoint(0xF040), 170, 140); // wi-cloud-up
-
-  // Free font from memory after use
-  tft.unloadFont();
+    if (SPIFFS.exists("/calibri24.vlw")) {
+        tft.loadFont(mainFont, SPIFFS);
+        tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+        tft.drawString(desc, 200, 250);
+        tft.unloadFont();
+    } else {
+        Serial.println("Missing font: /calibri24.vlw");
+    }
 }
 
-void testSmoothFonts() {
+void lcdDrawSpotGraph(float* prices) {
+    int graphHeight = 100;  // Height of the graph area (60% of screen = 192)
+    int graphWidth = 240;   // Width of the screen
+    int graphBottom = 320;  // Position of the bottom of the screen (height of the TFT screen)
+    int dataSize = 24;      // Size of data array
 
-  // Mount SPIFFS so the .vlw font files can be loaded
-  if (!SPIFFS.begin(true)) {
-    Serial.println("SPIFFS mount failed");
-    return;
-  }
+    // Find maximum price to scale the graph
+    float maxPrice = 0;
+    for (int i = 0; i < dataSize; i++) {
+        if (prices[i] > maxPrice) {
+            maxPrice = prices[i];
+        }
+    }
 
-  // Clear screen and set default text colors
-  tft.fillScreen(TFT_BLACK);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+    // Get the current hour
+    int currentHour = getCurrentHour();
 
-  // Current Y position for printing lines
-  int y = 0;
+    // Draw bars for graph according to data array size
+    for (int i = 0; i < dataSize; i++) {
+        // Scale bar height by maxPrice
+        int scaledHeight = (int)((prices[i] / maxPrice) * graphHeight);
 
-  // -----------------------------
-  // Font 1: calibri16
-  // -----------------------------
-  if (SPIFFS.exists("/calibri16.vlw")) {
-    tft.loadFont("calibri16", SPIFFS);
-    tft.drawString("Hello World!123", 0, y);
-    Serial.println("Printed with font: calibri16");
-    y += tft.fontHeight() + 6;
-    tft.unloadFont();
-  } else {
-    Serial.println("Missing font: /calibri16.vlw");
-  }
+        // X position of the bar
+        int graphX = map(i, 0, dataSize, 0, graphWidth);
 
-  // -----------------------------
-  // Font 2: calibri24
-  // -----------------------------
-  if (SPIFFS.exists("/calibri24.vlw")) {
-    tft.loadFont("calibri24", SPIFFS);
-    tft.drawString("Hello World!123", 0, y);
-    Serial.println("Printed with font: calibri24");
-    y += tft.fontHeight() + 6;
-    tft.unloadFont();
-  } else {
-    Serial.println("Missing font: /calibri24.vlw");
-  }
+        // Y position (bottom up)
+        int graphY = graphBottom - scaledHeight;
 
-  // -----------------------------
-  // Font 3: calibri36
-  // -----------------------------
-  if (SPIFFS.exists("/calibri36.vlw")) {
-    tft.loadFont("calibri36", SPIFFS);
-    tft.drawString("Hello World!123", 0, y);
-    Serial.println("Printed with font: calibri36");
-    y += tft.fontHeight() + 6;
-    tft.unloadFont();
-  } else {
-    Serial.println("Missing font: /calibri36.vlw");
-  }
+        // Alternate column colors White - LightGrey
+        uint16_t barColor = (i % 2 == 0) ? TFT_WHITE : TFT_LIGHTGREY;
 
-  // If the next fonts will not fit, pause and clear screen
-  if (y > tft.height() - 60) {
-    delay(2500);
-    tft.fillScreen(TFT_BLACK);
-    tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
-    y = 0;
-  }
+        // Highlight current hour in Blue
+        if (i == currentHour) {
+            barColor = TFT_BLUE;
+        }
 
-  // -----------------------------
-  // Font 4: calibril16
-  // -----------------------------
-  if (SPIFFS.exists("/calibril16.vlw")) {
-    tft.loadFont("calibril16", SPIFFS);
-    tft.drawString("Hello World!123", 0, y);
-    Serial.println("Printed with font: calibril16");
-    y += tft.fontHeight() + 6;
-    tft.unloadFont();
-  } else {
-    Serial.println("Missing font: /calibril16.vlw");
-  }
+        // Highlight peak price in Red
+        if (prices[i] == maxPrice) {
+            barColor = TFT_RED;
+        }
 
-  // -----------------------------
-  // Font 5: calibril24
-  // -----------------------------
-  if (SPIFFS.exists("/calibril24.vlw")) {
-    tft.loadFont("calibril24", SPIFFS);
-    tft.drawString("Hello World!123", 0, y);
-    Serial.println("Printed with font: calibril24");
-    y += tft.fontHeight() + 6;
-    tft.unloadFont();
-  } else {
-    Serial.println("Missing font: /calibril24.vlw");
-  }
-
-  // -----------------------------
-  // Font 6: calibril36
-  // -----------------------------
-  if (SPIFFS.exists("/calibril36.vlw")) {
-    tft.loadFont("calibril36", SPIFFS);
-    tft.drawString("Hello World!123", 0, y);
-    Serial.println("Printed with font: calibril36");
-    y += tft.fontHeight() + 6;
-    tft.unloadFont();
-  } else {
-    Serial.println("Missing font: /calibril36.vlw");
-  }
-
-  // Show the last big font on a fresh screen so it fits properly
-  delay(2500);
-  tft.fillScreen(TFT_BLACK);
-  tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
-  y = 0;
-
-  // -----------------------------
-  // Font 7: DSEG7Modern-Bold36
-  // -----------------------------
-  if (SPIFFS.exists("/DSEG7Modern-Bold36.vlw")) {
-    tft.loadFont("DSEG7Modern-Bold36", SPIFFS);
-    tft.drawString("0123456789", 0, y);
-    Serial.println("Printed with font: DSEG7Modern-Bold36");
-    tft.unloadFont();
-  } else {
-    Serial.println("Missing font: /DSEG7Modern-Bold36.vlw");
-  }
-}
-
-void lcd_updateDate(String d){
-
-  //This function is just for example!
-  
-  tft.drawRect(0,0,100,30,TFT_GREEN);
-
-  if (SPIFFS.exists("/calibri16.vlw")) {
-    tft.loadFont("calibril16", SPIFFS);
-    tft.setTextColor(TFT_GREEN, TFT_BLACK, true);
-    tft.drawString(d, 5, 5);
-    //Serial.println("Printed with font: calibri16");
-    tft.unloadFont();
-  } else {
-    Serial.println("Missing font: /calibri16.vlw");
-  }
+        // Draw bar
+        tft.fillRect(graphX, graphY, 10, scaledHeight, barColor);  // Draw the bar
+    }
 }

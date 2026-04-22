@@ -9,6 +9,6 @@ struct SCDData {
     bool valid;
 };
 
-void scd_setup();
-void scd_update();
-SCDData scd_get();
+void scdSetup();
+void scdUpdate();
+SCDData scdGet();

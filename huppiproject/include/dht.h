@@ -10,8 +10,8 @@ struct DHTData {
     bool valid;
 };
 
-void dht_setup();
-void dht_update();
-DHTData dht_get();
+void dhtSetup();
+void dhtUpdate();
+DHTData dhtGet();
 
 #endif
