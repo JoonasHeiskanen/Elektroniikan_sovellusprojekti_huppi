@@ -68,6 +68,7 @@ void loop() {
 
        if (forceScreenRefresh) {
             forceScreenRefresh = false;
+            uiLines(1);
             uiUpdateDate();
             uiUpdateTime();
             uiUpdateDHT();
@@ -106,6 +107,7 @@ void loop() {
 
         if (forceScreenRefresh) {
             forceScreenRefresh = false;
+            uiLines(2);
             uiUpdatePrices();
             uiSpotGraph();
         }

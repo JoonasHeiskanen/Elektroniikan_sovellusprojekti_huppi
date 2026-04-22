@@ -17,17 +17,30 @@ static String lastWeatherDesc = "";
 
 void uiBegin() {}
 
+void uiLines(int s = 1) {
+    if (s == 1) {
+        lcdDrawLine(0, 100, 240, 100);
+        lcdDrawLine(0, 210, 240, 210);
+        lcdDrawLine(0, 101, 240, 101);
+        lcdDrawLine(0, 211, 240, 211);
+    } else {
+        lcdDrawLine(0, 120, 240, 120);
+    }
+}
+
 void uiUpdateTime() {
     char buf[16];
     snprintf(buf, sizeof(buf), "%s", getCurrentTime().c_str());
 
-    lcdDrawText(200, 0, String(buf), 40, 20);
+    //lcdDrawText(200, 0, String(buf), 40, 20);
+    lcdDrawTime(buf);
 }
 
 void uiUpdateDate() {
     String date = getDisplayDate();
 
-    lcdDrawText(0, 0, date, 100, 20);
+    //lcdDrawText(0, 0, date, 100, 20);
+    lcdDrawDate(date);
 }
 
 void uiUpdatePrices() {
@@ -55,15 +68,23 @@ void uiUpdateWeather() {
         return;
     }
 
-    char line1[32];
-    snprintf(line1, sizeof(line1), "%.1fC, Feels Like: %.1fC", w.outTemperature, w.feelsLike);
+    char buf1[32];
+    snprintf(buf1, sizeof(buf1), "%.1fC", w.outTemperature);
 
-    char line2[32];
-    snprintf(line2, sizeof(line2), "Hum: %d%%  Wind: %.1fm/s", w.humidity, w.wind);
+    char buf2[32];
+    snprintf(buf2, sizeof(buf2), "Feels like %.1fC", w.feelsLike);
 
-    lcdDrawText(0, 120, String(line1), 240, 20);
-    lcdDrawText(0, 140, String(w.desc), 240, 20);
-    lcdDrawText(0, 160, String(line2), 240, 20);
+    //char buf3[32];
+    //snprintf(buf3, sizeof(buf3), "Hum: %d%%", w.humidity);
+
+    //char buf4[32];
+    //snprintf(buf4, sizeof(buf4), "Wind: %.1fm/s", w.wind);
+
+    //lcdDrawText(0, 120, String(buf1), 240, 20);
+    //lcdDrawText(0, 140, String(w.desc), 240, 20);
+    //lcdDrawText(0, 160, String(buf2), 240, 20);
+
+    lcdDrawWeather(buf1, buf2, w.desc);
 }
 
 void uiUpdateWifi(bool force) {
