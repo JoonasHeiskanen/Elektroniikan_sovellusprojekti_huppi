@@ -41,6 +41,12 @@ void uiUpdateDate() {
 
     //lcdDrawText(0, 0, date, 100, 20);
     lcdDrawDate(date);
+    //lcdDrawText(5, 20, date, 40, 20);
+    
+    //lcdSetTextSize(1);
+    //lcdDrawText(5, 40, date, 40, 20);
+    
+
 }
 
 void uiUpdatePrices() {
@@ -119,6 +125,8 @@ void uiUpdateDHT() {
 
     lcdDrawText(0, 40, "T: " + String(d.temperature, 1) + " C", 240, 20);
     lcdDrawText(0, 60, "H: " + String(d.humidity, 1) + " %", 240, 20);*/
+
+    lcdDrawDHT(d.temperature, d.humidity);
 }
 
 void uiUpdateSCD() {
@@ -134,6 +142,7 @@ void uiUpdateSCD() {
 
 void uiSpotGraph() {
     lcdDrawSpotGraph(prices);
+    lcdDrawSpotHours();
 }
 
 void uiRender(DisplayState state) {
@@ -151,6 +160,7 @@ void uiRender(DisplayState state) {
 
         case STATE2: {
             uiUpdatePrices();
+            lcdDrawSpotHours();
             break;
         }
     }

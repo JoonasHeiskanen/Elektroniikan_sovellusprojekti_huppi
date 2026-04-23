@@ -19,4 +19,10 @@ void lcdDrawCurrentPrice(String c);
 
 void lcdDrawSpotGraph(float* prices);
 
+void lcdDrawDHT(float temp, float hum);
+
+void lcdSetTextSize(uint8_t size);
+
+void lcdDrawSpotHours();
+
 #endif

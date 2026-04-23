@@ -7,11 +7,13 @@
 #include "timeutils.h"
 
 String mainFont = "calibri24";
+String mainFontLight = "calibril24";
 String mainFont2 = "calibri16";
 String tempFont = "DSEG7Modern-Bold36";
+String spotPriceFont = "calibri10";
 
 //Align edge pixels where drawfunctions start to draw
-int leftAlign_x = 5;
+int leftAlign_x = 0;
 int topAlign_y = 5;
 
 TFT_eSPI tft = TFT_eSPI();
@@ -41,48 +43,52 @@ void lcdDrawLine(int32_t xs, int32_t ys, int32_t xe, int32_t ye) {
 void lcdDrawText(int x, int y, String text, int width = 240, int height = 20) {
     tft.fillRect(x, y, width, height, TFT_BLACK);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    tft.drawString(text, x, y, 2);
+    tft.drawString(text, x, y, 1);
+}
+
+void lcdSetTextSize(uint8_t size) {
+    tft.setTextSize(size);
 }
 
 void lcdDrawDate(String d){
-    if (SPIFFS.exists("/calibri24.vlw")) {
+    if (SPIFFS.exists("/"+ mainFont + ".vlw")) {
         tft.loadFont(mainFont, SPIFFS);
         tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
         tft.drawString(d, leftAlign_x, 5);
         tft.unloadFont();
     } else {
-        Serial.println("Missing font: /calibri24.vlw");
+        Serial.println("Missing font: /"+ mainFont + ".vlw");
     }
 }
 
 void lcdDrawTime(String t) {
-    if (SPIFFS.exists("/calibri24.vlw")) {
+    if (SPIFFS.exists("/"+ mainFont + ".vlw")) {
         tft.loadFont(mainFont, SPIFFS);
         tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
         tft.drawString(t, 175, topAlign_y);
         tft.unloadFont();
     } else {
-        Serial.println("Missing font: /calibri24.vlw");
+        Serial.println("Missing font: /"+ mainFont + ".vlw");
     }
 }
 
-void lcdDrawWeather(String temp, String temp2, String desc) {
+void lcdDrawWeather(String temp, String feel, String desc) {
     if (SPIFFS.exists("/DSEG7Modern-Bold36.vlw")) {
         tft.loadFont(tempFont, SPIFFS);
         tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
-        tft.drawString(temp, leftAlign_x, 220);
+        tft.drawString(temp, 150, 220);
         tft.unloadFont();
     } else {
         Serial.println("Missing font: /DSEG7Modern-Bold36.vlw");
     }
 
-    if (SPIFFS.exists("/calibri24.vlw")) {
+    if (SPIFFS.exists("/"+ mainFont + ".vlw")) {
         tft.loadFont(mainFont, SPIFFS);
         tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
-        tft.drawString(temp2, leftAlign_x, 260);
+        tft.drawString(feel, leftAlign_x, 225);
         tft.unloadFont();
     } else {
-        Serial.println("Missing font: /calibri24.vlw");
+        Serial.println("Missing font: /"+ mainFont + ".vlw");
     }
 
     /*if (SPIFFS.exists("/calibri24.vlw")) {
@@ -93,6 +99,52 @@ void lcdDrawWeather(String temp, String temp2, String desc) {
     } else {
         Serial.println("Missing font: /calibri24.vlw");
     }*/
+}
+
+void lcdDrawDHT(float temp, float hum) {
+    if (SPIFFS.exists("/DSEG7Modern-Bold36.vlw")) {
+        tft.loadFont(tempFont, SPIFFS);
+        tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+        tft.drawFloat(temp, 1, 150, 115);
+        tft.unloadFont();
+    } else {
+        Serial.println("Missing font: /DSEG7Modern-Bold36.vlw");
+    }
+    if (SPIFFS.exists("/"+ mainFont + ".vlw")) {
+        tft.loadFont(mainFont, SPIFFS);
+        tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+        tft.drawFloat(hum, 1, leftAlign_x, 115);
+        tft.unloadFont();
+    } else {
+        Serial.println("Missing font: /"+ mainFont + ".vlw");
+    }
+}
+
+void lcdDrawSpotHours() {
+    tft.setTextFont(1);             // Käytetään pienintä vakiofonttia
+    tft.setTextSize(1);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    
+    int yPos = 160;                 // Haluttu y-akselin korkeus
+    int pixelsPerHour = 10;         // 240 pikseliä / 24 tuntia = 10px per tunti
+
+    for (int hour = 0; hour < 24; hour++) {
+        // Lasketaan x-akselin sijainti
+        int xPos = hour * pixelsPerHour;
+
+        // Tulostetaan teksti esim. 3 tunnin välein (00, 03, 06...), 
+        // jotta numerot eivät mene päällekkäin
+        if (hour % 3 == 0) {
+            String hourLabel = (hour < 10 ? "0" : "") + String(hour);
+            
+            // drawCentreString auttaa pitämään numeron keskellä sille varattua 10px tilaa
+            tft.drawCentreString(hourLabel, xPos, yPos, 1);
+        }
+
+        // Piirretään pieni harmaa merkkiviiva jokaisen tunnin kohdalle 
+        // y-akselille 160:n yläpuolelle
+        tft.drawFastVLine(xPos, yPos - 5, 3, TFT_DARKGREY);
+    }
 }
 
 void lcdDrawCurrentPrice(String c) {
