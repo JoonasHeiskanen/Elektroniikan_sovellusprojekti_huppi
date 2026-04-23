@@ -12,6 +12,8 @@ void uiUpdateDate();
 
 void uiUpdatePrices();
 
+void uiUpdateCurrentPrice();
+
 void uiUpdateWeather();
 
 void uiUpdateWifi(bool);

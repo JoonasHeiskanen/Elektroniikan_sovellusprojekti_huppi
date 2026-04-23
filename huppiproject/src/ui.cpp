@@ -41,6 +41,12 @@ void uiUpdateDate() {
 
     //lcdDrawText(0, 0, date, 100, 20);
     lcdDrawDate(date);
+    //lcdDrawText(5, 20, date, 40, 20);
+    
+    //lcdSetTextSize(1);
+    //lcdDrawText(5, 40, date, 40, 20);
+    
+
 }
 
 void uiUpdatePrices() {
@@ -58,6 +64,16 @@ void uiUpdatePrices() {
         snprintf(buf2, sizeof(buf2), "Next: %.2f c/kWh", prices[nextH]);
         lcdDrawText(0, 20, String(buf2), 240, 20);
     }
+}
+
+void uiUpdateCurrentPrice() {
+    int h = getCurrentHour();
+    int nextH = (h + 1) % 24;
+
+    char buf[32];
+    snprintf(buf, sizeof(buf), "Now: %.2f c/kWh", prices[h]);
+    //lcdDrawText(5, 45, String(buf), 240, 20);
+    lcdDrawCurrentPrice(buf);
 }
 
 void uiUpdateWeather() {
@@ -101,29 +117,32 @@ void uiUpdateWifi(bool force) {
 void uiUpdateDHT() {
     DHTData d = dhtGet();
 
-    if (!d.valid) {
+    /*if (!d.valid) {
         lcdDrawText(0, 40, "T: --.- C", 240, 20);
         lcdDrawText(0, 60, "H: --.- %", 240, 20);
         return;
     }
 
     lcdDrawText(0, 40, "T: " + String(d.temperature, 1) + " C", 240, 20);
-    lcdDrawText(0, 60, "H: " + String(d.humidity, 1) + " %", 240, 20);
+    lcdDrawText(0, 60, "H: " + String(d.humidity, 1) + " %", 240, 20);*/
+
+    lcdDrawDHT(d.temperature, d.humidity);
 }
 
 void uiUpdateSCD() {
     SCDData s = scdGet();
 
-    if (!s.valid) {
+    /*if (!s.valid) {
         lcdDrawText(0, 80, "CO2: --- ppm", 240, 20);
         return;
     }
 
-    lcdDrawText(0, 80, "CO2: " + String(s.co2) + " ppm", 240, 20);
+    lcdDrawText(0, 80, "CO2: " + String(s.co2) + " ppm", 240, 20);*/
 }
 
 void uiSpotGraph() {
     lcdDrawSpotGraph(prices);
+    lcdDrawSpotHours();
 }
 
 void uiRender(DisplayState state) {
@@ -132,6 +151,7 @@ void uiRender(DisplayState state) {
         case STATE1: {
             uiUpdateDate();
             uiUpdateTime();
+            uiUpdateCurrentPrice();
             uiUpdateDHT();
             uiUpdateSCD();
             uiUpdateWeather();
@@ -140,6 +160,7 @@ void uiRender(DisplayState state) {
 
         case STATE2: {
             uiUpdatePrices();
+            lcdDrawSpotHours();
             break;
         }
     }

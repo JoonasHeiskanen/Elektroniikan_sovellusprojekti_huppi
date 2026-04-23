@@ -71,6 +71,7 @@ void loop() {
             uiLines(1);
             uiUpdateDate();
             uiUpdateTime();
+            uiUpdateCurrentPrice();
             uiUpdateDHT();
             uiUpdateSCD();
             uiUpdateWeather();
