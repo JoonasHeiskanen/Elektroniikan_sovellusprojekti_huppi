@@ -17,12 +17,13 @@ static String lastWeatherDesc = "";
 
 void uiBegin() {}
 
+//Draw STATE1 lines
 void uiLines(int s = 1) {
     if (s == 1) {
-        lcdDrawLine(0, 100, 240, 100);
-        lcdDrawLine(0, 210, 240, 210);
-        lcdDrawLine(0, 101, 240, 101);
-        lcdDrawLine(0, 211, 240, 211);
+        lcdDrawLine(0, 90, 240, 90);
+        lcdDrawLine(0, 91, 240, 91);
+        lcdDrawLine(0, 195, 240, 195);
+        lcdDrawLine(0, 196, 240, 196);
     } else {
         lcdDrawLine(0, 120, 240, 120);
     }
@@ -85,10 +86,10 @@ void uiUpdateWeather() {
     }
 
     char buf1[32];
-    snprintf(buf1, sizeof(buf1), "%.1fC", w.outTemperature);
+    snprintf(buf1, sizeof(buf1), "%.1f", w.outTemperature);
 
     char buf2[32];
-    snprintf(buf2, sizeof(buf2), "Feels like %.1fC", w.feelsLike);
+    snprintf(buf2, sizeof(buf2), "Feels: %.1fC", w.feelsLike);
 
     //char buf3[32];
     //snprintf(buf3, sizeof(buf3), "Hum: %d%%", w.humidity);
