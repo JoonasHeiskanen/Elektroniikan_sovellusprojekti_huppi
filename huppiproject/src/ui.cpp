@@ -20,6 +20,8 @@ void uiBegin() {}
 //Draw STATE1 lines
 void uiLines(int s = 1) {
     if (s == 1) {
+        lcdDrawLine(0, 34, 240, 34);
+        lcdDrawLine(0, 35, 240, 35);
         lcdDrawLine(0, 90, 240, 90);
         lcdDrawLine(0, 91, 240, 91);
         lcdDrawLine(0, 195, 240, 195);
@@ -27,6 +29,10 @@ void uiLines(int s = 1) {
     } else {
         lcdDrawLine(0, 120, 240, 120);
     }
+}
+
+void uiIN_OUT() {
+    lcdDrawIN_OUT();
 }
 
 void uiUpdateTime() {
@@ -72,7 +78,7 @@ void uiUpdateCurrentPrice() {
     int nextH = (h + 1) % 24;
 
     char buf[32];
-    snprintf(buf, sizeof(buf), "Now: %.2f c/kWh", prices[h]);
+    snprintf(buf, sizeof(buf), "Now: %.2f c/kWh  ", prices[h]);
     //lcdDrawText(5, 45, String(buf), 240, 20);
     lcdDrawCurrentPrice(buf);
 }
@@ -85,23 +91,28 @@ void uiUpdateWeather() {
         return;
     }
 
+    //for icons testing!
+    //strncpy(w.icon, "13d", sizeof(w.icon));
+    
+    lcdDrawWeatherIcon(w);
+
     char buf1[32];
-    snprintf(buf1, sizeof(buf1), "%.1f", w.outTemperature);
+    snprintf(buf1, sizeof(buf1), "%.1f ", w.outTemperature);
 
     char buf2[32];
-    snprintf(buf2, sizeof(buf2), "Feels: %.1fC", w.feelsLike);
+    snprintf(buf2, sizeof(buf2), "Feels: %.1fC  ", w.feelsLike);
 
-    //char buf3[32];
-    //snprintf(buf3, sizeof(buf3), "Hum: %d%%", w.humidity);
+    char buf3[32];
+    snprintf(buf3, sizeof(buf3), "Hum: %d%%  ", w.humidity);
 
-    //char buf4[32];
-    //snprintf(buf4, sizeof(buf4), "Wind: %.1fm/s", w.wind);
+    char buf4[32];
+    snprintf(buf4, sizeof(buf4), "Wind: %.1fm/s ", w.wind);
 
     //lcdDrawText(0, 120, String(buf1), 240, 20);
     //lcdDrawText(0, 140, String(w.desc), 240, 20);
     //lcdDrawText(0, 160, String(buf2), 240, 20);
 
-    lcdDrawWeather(buf1, buf2, w.desc);
+    lcdDrawWeather(buf1, buf2, buf3, buf4, w.desc);
 }
 
 void uiUpdateWifi(bool force) {
@@ -112,7 +123,7 @@ void uiUpdateWifi(bool force) {
     if (!force && wifi == lastWifi) return;
     lastWifi = wifi;
 
-    lcdDrawText(0, 300, wifi ? "WiFi OK" : "WiFi LOST", 240, 20);
+    lcdDrawText(125, 5, wifi ? "WiFi OK" : "WiFi LOST", 240, 20);
 }
 
 void uiUpdateDHT() {
@@ -133,12 +144,13 @@ void uiUpdateDHT() {
 void uiUpdateSCD() {
     SCDData s = scdGet();
 
-    /*if (!s.valid) {
-        lcdDrawText(0, 80, "CO2: --- ppm", 240, 20);
+    if (!s.valid) {
+        //lcdDrawText(0, 140, "CO2: --- ppm", 240, 20);
+        lcdDrawSCD(s.co2);
         return;
     }
-
-    lcdDrawText(0, 80, "CO2: " + String(s.co2) + " ppm", 240, 20);*/
+    //lcdDrawText(0, 140, "CO2: " + String(s.co2) + " ppm", 240, 20);
+    lcdDrawSCD(s.co2);
 }
 
 void uiSpotGraph() {

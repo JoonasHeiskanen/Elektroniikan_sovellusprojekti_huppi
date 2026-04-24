@@ -24,7 +24,7 @@ static unsigned long lastWeatherUpdate = 0;
 const unsigned long weatherInterval = 300000;
 
 static unsigned long lastSensorUpdate = 0;
-const unsigned long sensorInterval = 1000;
+const unsigned long sensorInterval = 2000;
 
 void setup() {
     Serial.begin(115200);
@@ -69,6 +69,7 @@ void loop() {
        if (forceScreenRefresh) {
             forceScreenRefresh = false;
             uiLines(1);
+            uiIN_OUT();
             uiUpdateDate();
             uiUpdateTime();
             uiUpdateCurrentPrice();
