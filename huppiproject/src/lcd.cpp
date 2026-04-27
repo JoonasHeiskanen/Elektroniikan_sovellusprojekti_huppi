@@ -3,7 +3,7 @@
 #include <FS.h>
 #include <SPIFFS.h>
 #include "weather.h"
-
+#include "spotprice.h"
 #include "lcd.h"
 #include "timeutils.h"
 
@@ -68,7 +68,7 @@ void lcdDrawTime(String t) {
     if (SPIFFS.exists("/"+ mainFont + ".vlw")) {
         tft.loadFont(mainFont, SPIFFS);
         tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
-        tft.drawString(t, 175, topAlign_y);
+        tft.drawString(t, 180, topAlign_y);
         tft.unloadFont();
     } else {
         Serial.println("Missing font: /"+ mainFont + ".vlw");
@@ -140,16 +140,26 @@ void lcdDrawWeatherIcon(WeatherData w) {
 void lcdDrawWeather(String temp, String feel, String hum, String wind) {
     if (SPIFFS.exists("/"+ tempFont + ".vlw")) {
         tft.loadFont(tempFont, SPIFFS);
-        tft.setTextColor(TFT_ORANGE, TFT_BLACK, true);
-        tft.drawString(temp, 145, 205);
+        WeatherData w = getWeather();
+        if (w.outTemperature >= 15.0) {
+            tft.setTextColor(TFT_ORANGE, TFT_BLACK, true);
+        }
+        else if (w.outTemperature >= 0.0) {
+            tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+        }
+        else {
+            tft.setTextColor(TFT_CYAN, TFT_BLACK, true);
+        }
+        tft.drawString(temp, 140, 210);
         tft.unloadFont();
+        
     } else {
         Serial.println("Missing font: /"+ tempFont + ".vlw");
     }
-    /*tft.loadFont("weathericons-36", SPIFFS);
+    tft.loadFont("weathericons-36", SPIFFS);
     tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
-    tft.drawString(utf8FromCodepoint(0xF03C), 205, 95);  // wi-celsius
-    tft.unloadFont();*/
+    tft.drawString(utf8FromCodepoint(0xF03C), 212, 200);  // wi-celsius
+    tft.unloadFont();
 
     if (SPIFFS.exists("/"+ mainFont + ".vlw")) {
         tft.loadFont(mainFont, SPIFFS);
@@ -181,23 +191,20 @@ void lcdDrawDHT(float temp, float hum) {
     if (SPIFFS.exists("/"+ tempFont + ".vlw")) {
         tft.loadFont(tempFont, SPIFFS);
         tft.setTextColor(TFT_ORANGE, TFT_BLACK, true);
-        tft.drawFloat(temp, 1, 145, 105);
+        tft.drawFloat(temp, 1, 140, 105);
         tft.unloadFont();
     } else {
         Serial.println("Missing font: /"+ tempFont + ".vlw");
     }
     tft.loadFont("weathericons-36", SPIFFS);
     tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
-    tft.drawString(utf8FromCodepoint(0xF03C), 210, 95);  // wi-celsius
+    tft.drawString(utf8FromCodepoint(0xF03C), 212, 95);  // wi-celsius
     tft.unloadFont();
     if (SPIFFS.exists("/"+ mainFont + ".vlw")) {
         tft.loadFont(mainFont, SPIFFS);
         tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
-        // Luodaan valmis teksti: "Humidity: 45.2%"
         // String(hum, 1) muuttaa floatin tekstiksi yhdellä desimaalilla
         String humMessage = "Hum: " + String(hum, 1) + "%  ";
-        
-        // Tulostetaan koko viesti mainFontilla
         tft.drawString(humMessage, leftAlign_x, 135);
         
         tft.unloadFont();
@@ -258,21 +265,33 @@ void lcdDrawSpotHours() {
 }
 
 void lcdDrawCurrentPrice(String c) {
-    if (SPIFFS.exists("/calibri24.vlw")) {
+    if (SPIFFS.exists("/"+ mainFont + ".vlw")) {
         tft.loadFont(mainFont, SPIFFS);
-        tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+        int currentHour = getCurrentHour();
+        if (prices[currentHour] >= 15) {
+            tft.setTextColor(TFT_RED, TFT_BLACK, true);
+        }
+        else if (prices[currentHour] >= 10 && prices[currentHour] <= 14.99) {
+            tft.setTextColor(TFT_ORANGE, TFT_BLACK, true);
+        }
+        else if (prices[currentHour] >= 5 && prices[currentHour] <= 9.99) {
+            tft.setTextColor(TFT_YELLOW, TFT_BLACK, true);
+        }
+        else {
+            tft.setTextColor(TFT_GREEN, TFT_BLACK, true);
+        }
         tft.drawString(c, leftAlign_x, 60);
         tft.unloadFont();
     } else {
-        Serial.println("Missing font: /calibri24.vlw");
+        Serial.println("Missing font: /"+ mainFont + ".vlw");
     }
-    if (SPIFFS.exists("/calibri16.vlw")) {
+    if (SPIFFS.exists("/"+ mainFont + ".vlw")) {
         tft.loadFont(mainFont2, SPIFFS);
         tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
         tft.drawString("Electricity price", leftAlign_x, 40);
         tft.unloadFont();
     } else {
-        Serial.println("Missing font: /calibri24.vlw");
+        Serial.println("Missing font: /"+ mainFont2 + ".vlw");
     }
 }
 

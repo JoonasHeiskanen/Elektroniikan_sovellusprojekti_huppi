@@ -76,7 +76,7 @@ void uiUpdatePrices() {
 void uiUpdateCurrentPrice() {
     int h = getCurrentHour();
     int nextH = (h + 1) % 24;
-
+    
     char buf[32];
     snprintf(buf, sizeof(buf), "Now: %.2f c/kWh  ", prices[h]);
     //lcdDrawText(5, 45, String(buf), 240, 20);
