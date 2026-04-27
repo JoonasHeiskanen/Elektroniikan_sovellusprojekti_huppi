@@ -267,19 +267,14 @@ void lcdDrawSpotHours() {
 void lcdDrawCurrentPrice(String c) {
     if (SPIFFS.exists("/"+ mainFont + ".vlw")) {
         tft.loadFont(mainFont, SPIFFS);
-        int currentHour = getCurrentHour();
-        if (prices[currentHour] >= 15) {
-            tft.setTextColor(TFT_RED, TFT_BLACK, true);
-        }
-        else if (prices[currentHour] >= 10 && prices[currentHour] <= 14.99) {
-            tft.setTextColor(TFT_ORANGE, TFT_BLACK, true);
-        }
-        else if (prices[currentHour] >= 5 && prices[currentHour] <= 9.99) {
-            tft.setTextColor(TFT_YELLOW, TFT_BLACK, true);
-        }
-        else {
-            tft.setTextColor(TFT_GREEN, TFT_BLACK, true);
-        }
+        float p = prices[getCurrentHour()];
+        uint16_t color;
+
+        if (p >= 15.0)      color = TFT_RED;
+        else if (p >= 10.0) color = TFT_ORANGE;
+        else if (p >= 5.0)  color = TFT_YELLOW;
+        else                color = TFT_GREEN;
+        tft.setTextColor(color, TFT_BLACK, true);
         tft.drawString(c, leftAlign_x, 60);
         tft.unloadFont();
     } else {

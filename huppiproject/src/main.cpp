@@ -24,7 +24,7 @@ static unsigned long lastWeatherUpdate = 0;
 const unsigned long weatherInterval = 300000;
 
 static unsigned long lastSensorUpdate = 0;
-const unsigned long sensorInterval = 2000;
+const unsigned long sensorInterval = 30000;
 
 void setup() {
     Serial.begin(115200);
