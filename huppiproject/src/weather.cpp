@@ -6,7 +6,7 @@
 #include "weather.h"
 #include "secrets.h"
 
-static WeatherData weatherNow = {0.0, 0.0, 0, 0.0, "No data", false};
+static WeatherData weatherNow = {0.0, 0.0, 0, 0.0, "No data", "", false};
 
 void weatherBegin() {
     weatherNow.updated = false;
@@ -52,6 +52,9 @@ bool weatherUpdate() {
     const char* desc = doc["weather"][0]["description"];
     strncpy(weatherNow.desc, desc, sizeof(weatherNow.desc) - 1);
     weatherNow.desc[sizeof(weatherNow.desc) - 1] = '\0';
+    const char* iconId = doc["weather"][0]["icon"] | "01d"; // "|" antaa oletusarvon jos kenttää ei löydy
+    strncpy(weatherNow.icon, iconId, sizeof(weatherNow.icon) - 1);
+    weatherNow.icon[sizeof(weatherNow.icon) - 1] = '\0';
 
     weatherNow.updated = true;
 

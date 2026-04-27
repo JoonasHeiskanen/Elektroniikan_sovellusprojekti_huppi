@@ -7,6 +7,8 @@ void uiBegin();
 
 void uiLines(int s);
 
+void uiIN_OUT();
+
 void uiUpdateTime();
 void uiUpdateDate();
 
