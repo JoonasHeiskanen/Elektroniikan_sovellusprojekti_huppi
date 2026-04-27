@@ -95,6 +95,10 @@ void loop() {
             uiUpdateDHT();
             uiUpdateSCD();
         }
+        if (t->tm_hour != lastHour) {
+            lastHour = t->tm_hour;
+            uiUpdateCurrentPrice();
+        }
 
         if (millis() - lastWeatherUpdate >= weatherInterval) {
             lastWeatherUpdate = millis();
