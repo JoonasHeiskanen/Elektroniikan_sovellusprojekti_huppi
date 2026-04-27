@@ -13,7 +13,7 @@ void lcdDrawDate(String d);
 
 void lcdDrawTime(String t);
 
-void lcdDrawWeather(String temp, String temp2, String hum, String wind, String desc);
+void lcdDrawWeather(String temp, String temp2, String hum, String wind);
 
 void lcdDrawCurrentPrice(String c);
 
@@ -53,5 +53,10 @@ constexpr uint16_t WI_HUMIDITY            = 0xF07A; // droplet and %
 constexpr uint16_t WI_DEGREES             = 0xF042; // only the celsius dot .
 constexpr uint16_t WI_CLOUD_DOWN          = 0xF03D; //wifi down
 constexpr uint16_t WI_CLOUD_UP            = 0xF040; //wifi up
+
+constexpr uint16_t WI_NIGHT_CLEAR         = 0xF02E; //clear sky night
+constexpr uint16_t WI_NIGHT_ALT_CLOUDY    = 0xF086; //few clouds night
+constexpr uint16_t WI_NIGHT_MOON          = 0XF0AD; //wi-moon-waning-crescent-3
+
 
 #endif

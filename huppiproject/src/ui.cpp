@@ -92,7 +92,7 @@ void uiUpdateWeather() {
     }
 
     //for icons testing!
-    //strncpy(w.icon, "13d", sizeof(w.icon));
+    //strncpy(w.icon, "09d", sizeof(w.icon));
     
     lcdDrawWeatherIcon(w);
 
@@ -109,10 +109,10 @@ void uiUpdateWeather() {
     snprintf(buf4, sizeof(buf4), "Wind: %.1fm/s ", w.wind);
 
     //lcdDrawText(0, 120, String(buf1), 240, 20);
-    //lcdDrawText(0, 140, String(w.desc), 240, 20);
+    //lcdDrawText(175, 165, String(w.desc), 240, 20);
     //lcdDrawText(0, 160, String(buf2), 240, 20);
 
-    lcdDrawWeather(buf1, buf2, buf3, buf4, w.desc);
+    lcdDrawWeather(buf1, buf2, buf3, buf4);
 }
 
 void uiUpdateWifi(bool force) {
@@ -123,7 +123,7 @@ void uiUpdateWifi(bool force) {
     if (!force && wifi == lastWifi) return;
     lastWifi = wifi;
 
-    lcdDrawText(125, 5, wifi ? "WiFi OK" : "WiFi LOST", 240, 20);
+    //lcdDrawText(125, 5, wifi ? "WiFi OK" : "WiFi LOST", 240, 20);
 }
 
 void uiUpdateDHT() {
