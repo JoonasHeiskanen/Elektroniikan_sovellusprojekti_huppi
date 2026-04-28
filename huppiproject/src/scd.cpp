@@ -21,7 +21,7 @@ void scdSetup() {
 }
 
 void scdUpdate() {
-    if (millis() - lastRead < 2000) return;
+    if (millis() - lastRead < 10000) return;
     lastRead = millis();
 
     uint16_t error;

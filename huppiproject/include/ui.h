@@ -3,14 +3,20 @@
 #include <Arduino.h>
 #include "buttons.h"
 
-void uiBegin();
+//void uiBegin();
 
 void uiLines(int s);
+
+void uiIN_OUT();
 
 void uiUpdateTime();
 void uiUpdateDate();
 
-void uiUpdatePrices();
+//void uiUpdatePrices();
+
+void uiUpdateCurrentPrice();
+
+void uiUpdatePricePanel();
 
 void uiUpdateWeather();
 
@@ -21,4 +27,4 @@ void uiUpdateSCD();
 
 void uiSpotGraph();
 
-void uiRender(DisplayState state);
+//void uiRender(DisplayState state);

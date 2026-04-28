@@ -7,9 +7,8 @@ struct WeatherData {
     float feelsLike;
     int humidity;
     float wind;
-
     char desc[32];
-
+    char icon[4];
     bool updated;
 };
 

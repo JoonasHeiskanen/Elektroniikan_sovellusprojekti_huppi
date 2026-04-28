@@ -24,7 +24,7 @@ static unsigned long lastWeatherUpdate = 0;
 const unsigned long weatherInterval = 300000;
 
 static unsigned long lastSensorUpdate = 0;
-const unsigned long sensorInterval = 1000;
+const unsigned long sensorInterval = 30000;
 
 void setup() {
     Serial.begin(115200);
@@ -43,7 +43,7 @@ void setup() {
     weatherBegin();
     weatherUpdate();
 
-    uiBegin();
+    //uiBegin();
 }
 
 void loop() {
@@ -69,8 +69,10 @@ void loop() {
        if (forceScreenRefresh) {
             forceScreenRefresh = false;
             uiLines(1);
+            uiIN_OUT();
             uiUpdateDate();
             uiUpdateTime();
+            uiUpdateCurrentPrice();
             uiUpdateDHT();
             uiUpdateSCD();
             uiUpdateWeather();
@@ -80,6 +82,11 @@ void loop() {
         if (t->tm_min != lastMinute) {
             lastMinute = t->tm_min;
             uiUpdateTime();
+        }
+
+        if (t->tm_hour != lastHour) {
+            lastHour = t->tm_hour;
+            uiUpdateCurrentPrice();
         }
 
         String date = getDisplayDate();
@@ -108,13 +115,15 @@ void loop() {
         if (forceScreenRefresh) {
             forceScreenRefresh = false;
             uiLines(2);
-            uiUpdatePrices();
+            //uiUpdatePrices();
+            uiUpdatePricePanel();
             uiSpotGraph();
         }
 
         if (t->tm_hour != lastHour) {
             lastHour = t->tm_hour;
-            uiUpdatePrices();
+            //uiUpdatePrices();
+            uiUpdatePricePanel();
             uiSpotGraph();
         }
 
@@ -123,6 +132,8 @@ void loop() {
             lastApiDate = today;
             if (isWifiConnected()) {
                 fetchPrices();
+                uiUpdatePricePanel();
+                uiSpotGraph();
             }
         }
     }
