@@ -17,7 +17,11 @@ void lcdDrawWeather(String temp, String temp2, String hum, String wind);
 
 void lcdDrawCurrentPrice(String c);
 
+void lcdDrawPricePanel(int x, int y, int w, int h, String text, uint16_t color);
+
 void lcdDrawSpotGraph(float* prices);
+
+void lcdDrawSpotPriceScale(float* prices);
 
 void lcdDrawDHT(float temp, float hum);
 

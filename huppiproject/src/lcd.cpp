@@ -6,6 +6,7 @@
 #include "spotprice.h"
 #include "lcd.h"
 #include "timeutils.h"
+#include "scd.h"
 
 String mainFont = "calibri24";
 String mainFontLight = "calibril24";
@@ -43,12 +44,14 @@ void lcdDrawLine(int32_t xs, int32_t ys, int32_t xe, int32_t ye) {
     tft.drawLine(xs, ys, xe, ye, TFT_LIGHTGREY);
 }
 
+// voi poistaa
 void lcdDrawText(int x, int y, String text, int width = 240, int height = 20) {
     tft.fillRect(x, y, width, height, TFT_BLACK);
     tft.setTextColor(TFT_WHITE, TFT_BLACK);
     tft.drawString(text, x, y, 1);
 }
 
+// voi poistaa
 void lcdSetTextSize(uint8_t size) {
     tft.setTextSize(size);
 }
@@ -217,14 +220,27 @@ void lcdDrawDHT(float temp, float hum) {
 }
 
 void lcdDrawSCD(uint16_t co2) {
-    if (SPIFFS.exists("/"+ mainFont + ".vlw")) {
+    if (SPIFFS.exists("/" + mainFont + ".vlw")) {
         tft.loadFont(mainFont, SPIFFS);
+        uint16_t valColor;
+        if (co2 >= 1200) valColor = TFT_RED;
+        else if (co2 >= 801) valColor = TFT_YELLOW;
+        else valColor = TFT_GREEN;
+
         tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
-        String co2Message = "CO2: " + String(co2) + " ppm  ";
-        tft.drawString(co2Message, leftAlign_x, 165);
+        tft.drawString("CO2: ", leftAlign_x, 165);
+
+        int16_t xVal = leftAlign_x + tft.textWidth("CO2: ");
+
+        tft.setTextColor(valColor, TFT_BLACK, true);
+        tft.drawString(String(co2), xVal, 165);
+
+        int16_t xPpm = xVal + tft.textWidth(String(co2));
+
+        tft.setTextColor(TFT_WHITE, TFT_BLACK, true);
+        tft.drawString(" ppm  ", xPpm, 165); 
+
         tft.unloadFont();
-    } else {
-        Serial.println("Missing font: /"+ mainFont + ".vlw");
     }
 }
 
@@ -237,33 +253,6 @@ void lcdDrawIN_OUT() {
         tft.unloadFont();
     } else {
         Serial.println("Missing font: /"+ mainFont + ".vlw");
-    }
-}
-
-void lcdDrawSpotHours() {
-    tft.setTextFont(1);             // Käytetään pienintä vakiofonttia
-    tft.setTextSize(1);
-    tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    
-    int yPos = 160;                 // Haluttu y-akselin korkeus
-    int pixelsPerHour = 10;         // 240 pikseliä / 24 tuntia = 10px per tunti
-
-    for (int hour = 0; hour < 24; hour++) {
-        // Lasketaan x-akselin sijainti
-        int xPos = hour * pixelsPerHour;
-
-        // Tulostetaan teksti esim. 3 tunnin välein (00, 03, 06...), 
-        // jotta numerot eivät mene päällekkäin
-        if (hour % 3 == 0) {
-            String hourLabel = (hour < 10 ? "0" : "") + String(hour);
-            
-            // drawCentreString auttaa pitämään numeron keskellä sille varattua 10px tilaa
-            tft.drawCentreString(hourLabel, xPos, yPos, 1);
-        }
-
-        // Piirretään pieni harmaa merkkiviiva jokaisen tunnin kohdalle 
-        // y-akselille 160:n yläpuolelle
-        tft.drawFastVLine(xPos, yPos - 5, 3, TFT_DARKGREY);
     }
 }
 
@@ -302,50 +291,115 @@ void lcdDrawCurrentPrice(String c) {
     }
 }
 
-void lcdDrawSpotGraph(float* prices) {
-    int graphHeight = 100;  // Height of the graph area (60% of screen = 192)
-    int graphWidth = 240;   // Width of the screen
-    int graphBottom = 320;  // Position of the bottom of the screen (height of the TFT screen)
-    int dataSize = 24;      // Size of data array
+void lcdDrawPricePanel(int x, int y, int w, int h, String text, uint16_t color) {
+    if (!SPIFFS.exists("/calibri24.vlw")) {
+        Serial.println("Missing font: /calibri24.vlw");
+        return;
+    }
+    tft.fillRect(x, y, w, h, TFT_BLACK);
+    tft.loadFont(mainFont, SPIFFS);
+    tft.setTextColor(color, TFT_BLACK, true);
+    tft.drawString(text, x + 5, y + 5);
+    tft.unloadFont();
+}
 
-    // Find maximum price to scale the graph
-    float maxPrice = 0;
+void lcdDrawSpotGraph(float* prices) {
+    int leftMargin = 30;
+    int graphHeight = 192;
+    int graphBottom = 305;
+    int dataSize = 24;
+
+    int graphWidth = 240 - leftMargin;
+
+    float maxPrice = prices[0];
+    float minPrice = prices[0];
     for (int i = 0; i < dataSize; i++) {
-        if (prices[i] > maxPrice) {
-            maxPrice = prices[i];
-        }
+        if (prices[i] > maxPrice) maxPrice = prices[i];
+        if (prices[i] < minPrice) minPrice = prices[i];
     }
 
-    // Get the current hour
     int currentHour = getCurrentHour();
 
-    // Draw bars for graph according to data array size
     for (int i = 0; i < dataSize; i++) {
-        // Scale bar height by maxPrice
+        int graphX = leftMargin + (i * graphWidth) / dataSize;
+        int nextX  = leftMargin + ((i + 1) * graphWidth) / dataSize;
+        int barWidth = nextX - graphX;
+
         int scaledHeight = (int)((prices[i] / maxPrice) * graphHeight);
-
-        // X position of the bar
-        int graphX = map(i, 0, dataSize, 0, graphWidth);
-
-        // Y position (bottom up)
         int graphY = graphBottom - scaledHeight;
 
-        // Alternate column colors White - LightGrey
         uint16_t barColor = (i % 2 == 0) ? TFT_WHITE : TFT_LIGHTGREY;
 
-        // Highlight current hour in Blue
         if (i == currentHour) {
             barColor = TFT_BLUE;
         }
-
-        // Highlight peak price in Red
-        if (prices[i] == maxPrice) {
+        else if (prices[i] == maxPrice) {
             barColor = TFT_RED;
         }
+        else if (prices[i] == minPrice) {
+            barColor = TFT_GREEN;
+        }
 
-        // Draw bar
-        tft.fillRect(graphX, graphY, 10, scaledHeight, barColor);  // Draw the bar
+        tft.fillRect(graphX, graphY, barWidth, scaledHeight, barColor);
     }
+}
+
+void lcdDrawSpotHours() {
+    tft.setTextFont(1);
+    tft.setTextSize(1);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+
+    int leftMargin = 30;
+    int graphBottom = 305;
+    int yPos = graphBottom + 5;
+
+    int dataSize = 24;
+    int graphWidth = 240 - leftMargin;
+
+    for (int hour = 0; hour < dataSize; hour++) {
+        int graphX = leftMargin + (hour * graphWidth) / dataSize;
+        int nextX  = leftMargin + ((hour + 1) * graphWidth) / dataSize;
+
+        int xCenter = (graphX + nextX) / 2;
+
+        if (hour % 3 == 0) {
+            String hourLabel = String(hour);
+            tft.drawCentreString(hourLabel, xCenter + 1, yPos, 1);
+        }
+
+        tft.drawFastVLine(xCenter, yPos - 5, 3, TFT_DARKGREY);
+    }
+}
+
+void lcdDrawSpotPriceScale(float* prices) {
+    int leftMargin = 30;
+    int graphBottom = 305;
+    int graphHeight = 192;
+
+    int graphTop = graphBottom - graphHeight;
+
+    float maxPrice = 0;
+    for (int i = 0; i < 24; i++) {
+        if (prices[i] > maxPrice) maxPrice = prices[i];
+    }
+    if (maxPrice == 0) maxPrice = 1;
+
+    tft.setTextFont(1);
+    tft.setTextSize(1);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+
+    if (maxPrice <= 0) maxPrice = 1;
+
+    tft.drawRightString(String(maxPrice, 1), leftMargin - 2, graphTop - 5, 1);
+
+    float midPrice = maxPrice / 2.0;
+    int midY = graphBottom - (graphHeight / 2);
+
+    tft.drawRightString(String(midPrice, 1), leftMargin - 2, midY - 5, 1);
+
+    tft.drawRightString("0", leftMargin - 2, graphBottom - 5, 1);
+
+    tft.drawFastVLine(leftMargin, graphTop, graphHeight, TFT_DARKGREY);
 }
 
 String utf8FromCodepoint(uint16_t cp) {
