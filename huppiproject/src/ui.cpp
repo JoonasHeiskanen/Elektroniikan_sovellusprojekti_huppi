@@ -7,6 +7,7 @@
 #include "dht.h"
 #include "scd.h"
 #include "buttons.h"
+#include <TFT_eSPI.h>
 
 static int lastMinute = -1;
 static int lastHour = -1;
@@ -15,9 +16,8 @@ static bool lastWifi = false;
 static float lastTemp = -999;
 static String lastWeatherDesc = "";
 
-void uiBegin() {}
+//void uiBegin() {}
 
-//Draw STATE1 lines
 void uiLines(int s = 1) {
     if (s == 1) {
         lcdDrawLine(0, 34, 240, 34);
@@ -27,7 +27,8 @@ void uiLines(int s = 1) {
         lcdDrawLine(0, 195, 240, 195);
         lcdDrawLine(0, 196, 240, 196);
     } else {
-        lcdDrawLine(0, 120, 240, 120);
+        lcdDrawLine(0, 100, 240, 100);
+        lcdDrawLine(0, 101, 240, 101);
     }
 }
 
@@ -76,11 +77,51 @@ void uiUpdatePrices() {
 void uiUpdateCurrentPrice() {
     int h = getCurrentHour();
     int nextH = (h + 1) % 24;
-    
+
     char buf[32];
-    snprintf(buf, sizeof(buf), "Now: %.2f c/kWh  ", prices[h]);
+     snprintf(buf, sizeof(buf), "%.2f", prices[h]);
     //lcdDrawText(5, 45, String(buf), 240, 20);
     lcdDrawCurrentPrice(buf);
+}
+
+void uiUpdatePricePanel() {
+    int h = getCurrentHour();
+    int nextH = (h + 1) % 24;
+
+    float now = prices[h];
+    float next = (nextH == 0) ? NAN : prices[nextH];
+
+    float maxP = prices[0];
+    float minP = prices[0];
+
+    for (int i = 0; i < 24; i++) {
+        if (prices[i] > maxP) maxP = prices[i];
+        if (prices[i] < minP) minP = prices[i];
+    }
+
+    char buf[32];
+
+    int colW = 120;
+    int panelH = 112;
+    int rowH = 44;
+
+    int topOffset = (panelH - (2 * rowH)) / 2;
+
+    snprintf(buf, sizeof(buf), "Now: %.2f", now);
+    lcdDrawPricePanel(0, topOffset, colW, rowH, String(buf), TFT_BLUE);
+
+    if (isnan(next)) {
+        lcdDrawPricePanel(0, topOffset + rowH, colW, rowH, "Next: -.--", TFT_WHITE);
+    } else {
+        snprintf(buf, sizeof(buf), "Next: %.2f", next);
+        lcdDrawPricePanel(0, topOffset + rowH, colW, rowH, String(buf), TFT_WHITE);
+    }
+
+    snprintf(buf, sizeof(buf), "Max: %.2f", maxP);
+    lcdDrawPricePanel(colW, topOffset, colW, rowH, String(buf), TFT_RED);
+
+    snprintf(buf, sizeof(buf), "Min: %.2f", minP);
+    lcdDrawPricePanel(colW, topOffset + rowH, colW, rowH, String(buf), TFT_GREEN);
 }
 
 void uiUpdateWeather() {
@@ -93,7 +134,6 @@ void uiUpdateWeather() {
 
     //for icons testing!
     //strncpy(w.icon, "09d", sizeof(w.icon));
-    
     lcdDrawWeatherIcon(w);
 
     char buf1[32];
@@ -145,20 +185,21 @@ void uiUpdateSCD() {
     SCDData s = scdGet();
 
     if (!s.valid) {
-        //lcdDrawText(0, 140, "CO2: --- ppm", 240, 20);
+        //lcdDrawText(0, 80, "CO2: --- ppm", 240, 20);
         lcdDrawSCD(s.co2);
         return;
     }
-    //lcdDrawText(0, 140, "CO2: " + String(s.co2) + " ppm", 240, 20);
+    //lcdDrawText(0, 80, "CO2: " + String(s.co2) + " ppm", 240, 20);
     lcdDrawSCD(s.co2);
 }
 
 void uiSpotGraph() {
     lcdDrawSpotGraph(prices);
+    lcdDrawSpotPriceScale(prices);
     lcdDrawSpotHours();
 }
 
-void uiRender(DisplayState state) {
+/*void uiRender(DisplayState state) {
     switch (state) {
 
         case STATE1: {
@@ -177,4 +218,4 @@ void uiRender(DisplayState state) {
             break;
         }
     }
-}
+}*/

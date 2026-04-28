@@ -11,7 +11,7 @@ void dhtSetup() {
 }
 
 void dhtUpdate() {
-    if (millis() - lastRead < 2000) return;
+    if (millis() - lastRead < 10000) return;
     lastRead = millis();
 
     DHT.read();
