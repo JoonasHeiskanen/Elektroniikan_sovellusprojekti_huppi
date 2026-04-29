@@ -8,6 +8,7 @@ enum DisplayState {
 
 void buttonSetup();
 void checkButton();
+int getBrightness();
 
 DisplayState getState();
 

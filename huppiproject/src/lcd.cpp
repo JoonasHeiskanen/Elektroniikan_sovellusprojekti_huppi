@@ -7,6 +7,7 @@
 #include "lcd.h"
 #include "timeutils.h"
 #include "scd.h"
+#include "buttons.h"
 
 String mainFont = "calibri24";
 String mainFontLight = "calibril24";
@@ -20,6 +21,8 @@ String spotPriceFont = "calibri10";
 int leftAlign_x = 0;
 int topAlign_y = 5;
 
+const int backlightPin = 16;
+
 TFT_eSPI tft = TFT_eSPI();
 
 void lcdSetup() {
@@ -28,12 +31,30 @@ void lcdSetup() {
         while (true) delay(1000);
     }
 
-    pinMode(16, OUTPUT);
-    digitalWrite(16, HIGH);
+    ledcSetup(0, 5000, 8);      // Kanava 0, 5kHz, 8-bit resoluutio (0-255)
+    ledcAttachPin(backlightPin, 0);
+    updateBacklight();          // Aseta alkukirkkaus
+
+    //pinMode(16, OUTPUT);
+    //digitalWrite(16, HIGH);
 
     tft.init();
     tft.setRotation(2);
     tft.fillScreen(TFT_BLACK);
+}
+
+void updateBacklight() {
+    int level = getBrightness(); // Haetaan arvo buttons.cpp:stä
+    int pwmValue = 0;
+
+    switch(level) {
+        case 3: pwmValue = 255; break; // 100%
+        case 2: pwmValue = 150; break; // n. 60%
+        case 1: pwmValue = 50;  break; // n. 20%
+        case 0: pwmValue = 0;   break; // Pois päältä
+    }
+
+    ledcWrite(0, pwmValue); // Kirjoitetaan PWM-arvo
 }
 
 void lcdClear() {
