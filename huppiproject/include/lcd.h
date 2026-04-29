@@ -29,6 +29,8 @@ void lcdDrawSCD(uint16_t co2);
 
 void lcdDrawIN_OUT();
 
+void updateBacklight(); 
+
 struct WeatherData;
 
 void lcdDrawWeatherIcon(WeatherData w);
